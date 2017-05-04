@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private final static String TMBD_Url = "https://api.themoviedb.org/3/discover/movie";
-    private final static String API_KEY = "?api_key="+"";
+    private final static String API_KEY = "?api_key="+"382a81cb81a8ab80eb5f89325e2095d3";
     private final static String DISCOVERY_URL_POPULAR = "&language=en-US&sort_by=popularity.desc";
 //    private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_average.desc";
     private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_count.desc";
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             gridView.setVisibility(android.view.View.INVISIBLE);
-            Toast.makeText(MainActivity.this,"NO_INtenet",Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this,"NO_Internet",Toast.LENGTH_LONG).show();
 
             imageView.setImageDrawable(drawable);
 
@@ -179,57 +179,118 @@ public class MainActivity extends AppCompatActivity {
         MenuItem PopularMENU = (MenuItem) menu.findItem(R.id.Popular);
         MenuItem RatingMENU = (MenuItem) menu.findItem(R.id.Rating);
 
+
         switch (item.getItemId()){
 
             case R.id.Rating:
 
-                PopularMENU.setVisible(true);
-                RatingMENU.setVisible(false);
+                if(isNetworkStatusAvialable (getApplicationContext())) {
 
-                DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_RATING+PAGE;
+                    if(gridView.getVisibility() == android.view.View.INVISIBLE){
+
+                        gridView.setVisibility(android.view.View.VISIBLE);
+                        imageView.setVisibility(android.view.View.INVISIBLE);
+
+                    }
+
+                    PopularMENU.setVisible(true);
+                    RatingMENU.setVisible(false);
+
+                    DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_RATING+PAGE;
 
 
-                MovieDataArray.clear();
-                adpater.clear();
-                adpater.notifyDataSetChanged();
-                Log.e("Rating","Rating");
+                    if(adpater != null){
+                        MovieDataArray.clear();
+                        adpater.clear();
+                        adpater.notifyDataSetChanged();
+                        Log.e("Rating","Rating");
+                    }
+
+                    MovieAsyncTask task = new MovieAsyncTask();
+                    task.execute();
+
+                    Toast.makeText(MainActivity.this,getResources().getText(R.string.Highest_rated_movies),Toast.LENGTH_SHORT).show();
 
 
-                MovieAsyncTask task = new MovieAsyncTask();
-                task.execute();
+                } else {
 
-                Toast.makeText(MainActivity.this,getResources().getText(R.string.Highest_rated_movies),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
+
+                }
+
                 return true;
 
             case R.id.Popular:
 
-                PopularMENU.setVisible(false);
-                RatingMENU.setVisible(true);
 
-                DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_POPULAR+PAGE;
+                if(isNetworkStatusAvialable (getApplicationContext())) {
 
-                MovieDataArray.clear();
-                adpater.clear();
-                adpater.notifyDataSetChanged();
-                Log.e("Popular","Popular");
+                    if(gridView.getVisibility() == android.view.View.INVISIBLE){
 
-                MovieAsyncTask task1 = new MovieAsyncTask();
-                task1.execute();
+                        gridView.setVisibility(android.view.View.VISIBLE);
+                        imageView.setVisibility(android.view.View.INVISIBLE);
 
-                Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_SHORT).show();
+                    }
+
+                    PopularMENU.setVisible(false);
+                    RatingMENU.setVisible(true);
+
+                    DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_POPULAR+PAGE;
+
+                    if(adpater != null){
+                        MovieDataArray.clear();
+                        adpater.clear();
+                        adpater.notifyDataSetChanged();
+                        Log.e("Popular","Popular");
+                    }
+
+
+                    MovieAsyncTask task1 = new MovieAsyncTask();
+                    task1.execute();
+
+                    Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_SHORT).show();
+
+
+                } else {
+
+                    Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
+
+                }
+
                 return true;
 
 
             case R.id.Refresh:
 
-                MovieDataArray.clear();
-                adpater.clear();
-                adpater.notifyDataSetChanged();
 
-                MovieAsyncTask task2 = new MovieAsyncTask();
-                task2.execute();
+
+                if(isNetworkStatusAvialable (getApplicationContext())) {
+
+                    if(gridView.getVisibility() == android.view.View.INVISIBLE){
+
+                        gridView.setVisibility(android.view.View.VISIBLE);
+                        imageView.setVisibility(android.view.View.INVISIBLE);
+
+                    }
+
+
+                    if(adpater != null){
+                        MovieDataArray.clear();
+                        adpater.clear();
+                        adpater.notifyDataSetChanged();
+                    }
+
+                    MovieAsyncTask task2 = new MovieAsyncTask();
+                    task2.execute();
+
+
+                } else {
+
+                    Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
+
+                }
+
                 return true;
-
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -346,7 +407,6 @@ public class MainActivity extends AppCompatActivity {
 
             return MovieDataArray;
         }
-
 
 
         private String httprequest(URL url) throws IOException {
