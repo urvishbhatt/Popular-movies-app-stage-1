@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private final static String TMBD_Url = "https://api.themoviedb.org/3/discover/movie";
-    private final static String API_KEY = "?api_key="+"382a81cb81a8ab80eb5f89325e2095d3";
+    private final static String API_KEY = "?api_key="+"";
     private final static String DISCOVERY_URL_POPULAR = "&language=en-US&sort_by=popularity.desc";
 //    private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_average.desc";
     private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_count.desc";
