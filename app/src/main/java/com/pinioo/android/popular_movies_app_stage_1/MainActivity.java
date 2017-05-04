@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
 
                     DISCOVERY_FUNCATION = DISCOVERY_URL_RATING;
 
-
                     if(adpater != null){
                         MovieDataArray.clear();
                         adpater.clear();
@@ -258,10 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
             default:
                 return super.onOptionsItemSelected(item);
-
-
         }
-
     }
 
 
@@ -318,7 +314,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             updateUI(movieData);
-
         }
 
         private ArrayList<MovieData> getJSONdata(String json) throws JSONException {
@@ -327,11 +322,8 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
 
-
             JSONObject FirstOBJ = new JSONObject(json);
             JSONArray FirstARRAY = FirstOBJ.getJSONArray("results");
-
-
 
             if (FirstARRAY.length() > 0) {
 
@@ -374,7 +366,6 @@ public class MainActivity extends AppCompatActivity {
 
             HttpURLConnection urlConnection = null;
             InputStream inputStream = null;
-
 
             try{
                urlConnection = (HttpURLConnection)url.openConnection();

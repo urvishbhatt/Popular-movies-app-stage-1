@@ -54,11 +54,6 @@ public class DetailsActivity extends AppCompatActivity {
     int MovieId;
     String MovieIdString;
 
-
-
-
-
-
     private final static String IMAGEURLW500 = "https://image.tmdb.org/t/p/w500";
 
     @Override
@@ -69,11 +64,6 @@ public class DetailsActivity extends AppCompatActivity {
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
-
-
-
 
         Original_title = (String) getIntent().getExtras().get("original_title");
         Poster = (String) getIntent().getExtras().get("poster");
