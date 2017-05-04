@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/playtraile"
+        android:title="playvideo"
+        android:icon="@drawable/ic_play_circle_filled_black_24dp"
+        android:visible="true"
+        app:showAsAction="always"/>
+
+</menu>

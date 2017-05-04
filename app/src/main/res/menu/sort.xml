@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="Rating"
+        android:id="@+id/Rating"
+        android:icon="@drawable/ic_002_favorite"
+        app:showAsAction="always"
+        android:orderInCategory="1"
+        />
+    <item
+        android:title="Popular"
+        android:id="@+id/Popular"
+        android:icon="@drawable/ic_001_crown"
+        app:showAsAction="always"
+        android:orderInCategory="1"
+        />
+    <item
+        android:id="@+id/Refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_sync_black_24dp"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="2"/>
+
+</menu>
