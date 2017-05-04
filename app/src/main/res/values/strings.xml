@@ -7,4 +7,7 @@
     <string name="Highest_rated_movies">Highest rated movies</string>
     <string name="Most_popular_movies">Most popular movies</string>
 
+    <string name="NO_Internet">NO_Internet</string>
+    <string name="No_internet_connection">No internet connection</string>
+
 </resources>

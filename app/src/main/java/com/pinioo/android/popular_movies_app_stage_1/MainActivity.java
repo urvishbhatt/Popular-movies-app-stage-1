@@ -57,29 +57,18 @@ public class MainActivity extends AppCompatActivity {
 
 
     private final static String TMBD_Url = "https://api.themoviedb.org/3/discover/movie";
-    private final static String API_KEY = "?api_key="+"";
-    private final static String DISCOVERY_URL_POPULAR = "&language=en-US&sort_by=popularity.desc";
-//    private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_average.desc";
-    private final static String DISCOVERY_URL_RATING = "&language=en-US&sort_by=vote_count.desc";
-    private String PAGE = "&page=1";
-
+    private final static String API_KEY = "382a81cb81a8ab80eb5f89325e2095d3";
+    private final static String DISCOVERY_URL_POPULAR = "https://api.themoviedb.org/3/movie/popular?api_key="+API_KEY+"&language=en-US&page=1";
+    private final static String DISCOVERY_URL_RATING = "https://api.themoviedb.org/3/movie/top_rated?api_key="+API_KEY+"&language=en-US&page=1";
     private final static String IMAGEURLW500 = "https://image.tmdb.org/t/p/w500";
     private final static String IMAGEURLW300 = "https://image.tmdb.org/t/p/w300";
-
-
-
-//    public String DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_POPULAR+PAGE;
 
     public String DISCOVERY_FUNCATION;
 
     GridView gridView = null;
-
     ImageView imageView = null;
-
     ArrayList<MovieData> MovieDataArray = new ArrayList<>();
-
     Adpater adpater;
-
     Menu menu;
 
 
@@ -95,29 +84,19 @@ public class MainActivity extends AppCompatActivity {
         Drawable drawable  = getResources().getDrawable(R.drawable.no_internet_connection);
         /*************/
 
-
-
-        DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_POPULAR+PAGE;
-//        DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_RATING+PAGE;
-
-
+        DISCOVERY_FUNCATION = DISCOVERY_URL_POPULAR;
 
         if(isNetworkStatusAvialable (getApplicationContext())) {
 
             Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_LONG).show();
-
             gridView.setVisibility(android.view.View.VISIBLE);
-
             MovieAsyncTask task = new MovieAsyncTask();
             task.execute();
 
-
         } else {
 
-
             gridView.setVisibility(android.view.View.INVISIBLE);
-            Toast.makeText(MainActivity.this,"NO_Internet",Toast.LENGTH_LONG).show();
-
+            Toast.makeText(MainActivity.this,getResources().getText(R.string.NO_Internet),Toast.LENGTH_LONG).show();
             imageView.setImageDrawable(drawable);
 
         }
@@ -141,13 +120,11 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("vote",vote);
                 intent.putExtra("relesing_date",relesing_date);
                 intent.putExtra("Movieid",Movieid);
-
                 startActivity(intent);
             }
         });
 
     }
-
     public static boolean isNetworkStatusAvialable (Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null)
@@ -159,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -172,13 +148,11 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         MenuItem PopularMENU = (MenuItem) menu.findItem(R.id.Popular);
         MenuItem RatingMENU = (MenuItem) menu.findItem(R.id.Rating);
-
 
         switch (item.getItemId()){
 
@@ -196,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                     PopularMENU.setVisible(true);
                     RatingMENU.setVisible(false);
 
-                    DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_RATING+PAGE;
+                    DISCOVERY_FUNCATION = DISCOVERY_URL_RATING;
 
 
                     if(adpater != null){
@@ -214,14 +188,13 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
 
-                    Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,getResources().getText(R.string.No_internet_connection),Toast.LENGTH_LONG).show();
 
                 }
 
                 return true;
 
             case R.id.Popular:
-
 
                 if(isNetworkStatusAvialable (getApplicationContext())) {
 
@@ -235,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     PopularMENU.setVisible(false);
                     RatingMENU.setVisible(true);
 
-                    DISCOVERY_FUNCATION = TMBD_Url+API_KEY+DISCOVERY_URL_POPULAR+PAGE;
+                    DISCOVERY_FUNCATION = DISCOVERY_URL_POPULAR;
 
                     if(adpater != null){
                         MovieDataArray.clear();
@@ -244,25 +217,18 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("Popular","Popular");
                     }
 
-
                     MovieAsyncTask task1 = new MovieAsyncTask();
                     task1.execute();
 
                     Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_SHORT).show();
-
-
                 } else {
-
                     Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
-
                 }
 
                 return true;
 
 
             case R.id.Refresh:
-
-
 
                 if(isNetworkStatusAvialable (getApplicationContext())) {
 
@@ -272,8 +238,6 @@ public class MainActivity extends AppCompatActivity {
                         imageView.setVisibility(android.view.View.INVISIBLE);
 
                     }
-
-
                     if(adpater != null){
                         MovieDataArray.clear();
                         adpater.clear();
@@ -376,22 +340,14 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject secondOBJ = FirstARRAY.getJSONObject(i);
 
                     String Moviename = secondOBJ.getString("original_title");
-
                     String MoviePoster = secondOBJ.getString("poster_path");
-
                     double MovieRating = secondOBJ.getDouble("vote_average");
-
                     String MovieOverview = secondOBJ.getString("overview");
-
                     String MovieRelesingDate = secondOBJ.getString("release_date");
-
                     int MovieId = secondOBJ.getInt("id");
 
                     int[] androidColors = getResources().getIntArray(R.array.androidcolors);
                     int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
-
-//                    Random rnd = new Random();
-//                    int randomAndroidColor = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
 
                     MovieDataArray.add(new MovieData(Moviename,MoviePoster,MovieRating,MovieOverview,MovieRelesingDate,MovieId,randomAndroidColor));
 
@@ -401,7 +357,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("MovieOverview=",MovieOverview);
                     Log.e("MovieRelesingDate",MovieRelesingDate);
                     Log.e("movieId",String.valueOf(MovieId));
-
                 }
             }
 
@@ -446,7 +401,6 @@ public class MainActivity extends AppCompatActivity {
                     inputStream.close();
                 }
             }
-
             return jsonResponce;
         }
 
@@ -463,13 +417,8 @@ public class MainActivity extends AppCompatActivity {
                     line = readre.readLine();
                 }
             }
-
-
             return builder.toString();
         }
 
     }
-
-
-
 }
