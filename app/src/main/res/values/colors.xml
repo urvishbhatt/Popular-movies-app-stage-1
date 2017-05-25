@@ -25,6 +25,9 @@
         <item>@color/color8</item>
     </integer-array>
 
+    <color name="tabcolor">#F4958E</color>
+
+    <color name="gold_for_fab">#FFD700</color>
 
 </resources>
 

@@ -22,6 +22,11 @@
             android:parentActivityName=".MainActivity">
 
         </activity>
+
+        <provider
+            android:authorities="com.pinioo.android.popular_movies_app_stage_1"
+            android:name=".Database.MovieContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

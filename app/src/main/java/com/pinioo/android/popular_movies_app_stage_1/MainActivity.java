@@ -56,12 +56,11 @@ import static android.support.v7.appcompat.R.styleable.View;
 public class MainActivity extends AppCompatActivity {
 
 
-    private final static String TMBD_Url = "https://api.themoviedb.org/3/discover/movie";
+
     private final static String API_KEY = "";
     private final static String DISCOVERY_URL_POPULAR = "https://api.themoviedb.org/3/movie/popular?api_key="+API_KEY+"&language=en-US&page=1";
     private final static String DISCOVERY_URL_RATING = "https://api.themoviedb.org/3/movie/top_rated?api_key="+API_KEY+"&language=en-US&page=1";
-    private final static String IMAGEURLW500 = "https://image.tmdb.org/t/p/w500";
-    private final static String IMAGEURLW300 = "https://image.tmdb.org/t/p/w300";
+
 
     public String DISCOVERY_FUNCATION;
 
@@ -153,6 +152,8 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem PopularMENU = (MenuItem) menu.findItem(R.id.Popular);
         MenuItem RatingMENU = (MenuItem) menu.findItem(R.id.Rating);
+        MenuItem RefreshMenu = (MenuItem) menu.findItem(R.id.Refresh);
+        MenuItem FavoriteMenu = (MenuItem)menu.findItem(R.id.Favorite);
 
         switch (item.getItemId()){
 
@@ -169,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
 
                     PopularMENU.setVisible(true);
                     RatingMENU.setVisible(false);
+                    FavoriteMenu.setVisible(true);
+                    RefreshMenu.setVisible(true);
 
                     DISCOVERY_FUNCATION = DISCOVERY_URL_RATING;
 
@@ -206,6 +209,8 @@ public class MainActivity extends AppCompatActivity {
 
                     PopularMENU.setVisible(false);
                     RatingMENU.setVisible(true);
+                    FavoriteMenu.setVisible(true);
+                    RefreshMenu.setVisible(true);
 
                     DISCOVERY_FUNCATION = DISCOVERY_URL_POPULAR;
 
@@ -223,6 +228,17 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
                 }
+
+                return true;
+
+            case R.id.Favorite:
+
+                RefreshMenu.setVisible(false);
+                FavoriteMenu.setVisible(false);
+                PopularMENU.setVisible(true);
+                RatingMENU.setVisible(true);
+
+
 
                 return true;
 
@@ -260,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void updateUI(ArrayList<MovieData> MovieDataArray) {
 
         adpater = new Adpater(this,MovieDataArray);
@@ -269,7 +284,6 @@ public class MainActivity extends AppCompatActivity {
 
         gridView.setAdapter(adpater);
     }
-
 
     private class MovieAsyncTask extends AsyncTask<URL, Void ,ArrayList<MovieData>>{
 
