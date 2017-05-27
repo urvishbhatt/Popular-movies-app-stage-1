@@ -11,6 +11,7 @@
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         app:tabMode="fixed"
         app:tabGravity="fill"
         android:background="@color/colorPrimary"

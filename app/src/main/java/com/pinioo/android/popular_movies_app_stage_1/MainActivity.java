@@ -2,12 +2,14 @@ package com.pinioo.android.popular_movies_app_stage_1;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -32,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
@@ -39,6 +42,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -46,6 +50,8 @@ import java.util.zip.Inflater;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
+import com.pinioo.android.popular_movies_app_stage_1.Database.MovieContract;
+import com.pinioo.android.popular_movies_app_stage_1.Database.MovieSQLiteOpenHelper;
 import com.pinioo.android.popular_movies_app_stage_1.MovieData;
 
 import static android.support.v7.appcompat.R.styleable.ActionBar;
@@ -70,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
     Adpater adpater;
     Menu menu;
 
+    String json;
+
+    Boolean isFromDataBase;
+    Boolean isFromFavorite;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,20 +96,71 @@ public class MainActivity extends AppCompatActivity {
 
         DISCOVERY_FUNCATION = DISCOVERY_URL_POPULAR;
 
-        if(isNetworkStatusAvialable (getApplicationContext())) {
 
-            Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_LONG).show();
-            gridView.setVisibility(android.view.View.VISIBLE);
-            MovieAsyncTask task = new MovieAsyncTask();
-            task.execute();
+        if (savedInstanceState != null) {
+
+            Log.e("savedInstanceState","savedInstanceState != null");
+
+            json = savedInstanceState.getString("json");
+            isFromDataBase = savedInstanceState.getBoolean("boolean");
+
+                if(isFromDataBase){
+
+                    ArrayList<MovieData> MovieDataArray = null;
+
+                    MovieDataArray = getJSONDATA();
+                    updateUI(MovieDataArray);
+
+
+                } else {
+                    ArrayList<MovieData> MovieDataArray = null;
+                    try {
+                        MovieDataArray = getJSONdata(json);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    updateUI(MovieDataArray);
+                }
 
         } else {
 
-            gridView.setVisibility(android.view.View.INVISIBLE);
-            Toast.makeText(MainActivity.this,getResources().getText(R.string.NO_Internet),Toast.LENGTH_LONG).show();
-            imageView.setImageDrawable(drawable);
+            Log.e("savedInstanceState","savedInstanceState = null");
+
+            if(isNetworkStatusAvialable (getApplicationContext())) {
+
+                Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_LONG).show();
+                gridView.setVisibility(android.view.View.VISIBLE);
+                MovieAsyncTask task = new MovieAsyncTask();
+                task.execute();
+
+            } else {
+
+                gridView.setVisibility(android.view.View.INVISIBLE);
+                Toast.makeText(MainActivity.this,getResources().getText(R.string.NO_Internet),Toast.LENGTH_LONG).show();
+                imageView.setImageDrawable(drawable);
+
+            }
 
         }
+
+
+//            if(isNetworkStatusAvialable (getApplicationContext())) {
+//
+//                Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_LONG).show();
+//                gridView.setVisibility(android.view.View.VISIBLE);
+//                MovieAsyncTask task = new MovieAsyncTask();
+//                task.execute();
+//
+//            } else {
+//
+//                gridView.setVisibility(android.view.View.INVISIBLE);
+//                Toast.makeText(MainActivity.this,getResources().getText(R.string.NO_Internet),Toast.LENGTH_LONG).show();
+//                imageView.setImageDrawable(drawable);
+//
+//            }
+
+
+
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -113,17 +175,30 @@ public class MainActivity extends AppCompatActivity {
                 String relesing_date = MovieDataArray.get(position).getMovieRelesing_Date();
                 int Movieid = MovieDataArray.get(position).getMovieId();
 
-                intent.putExtra("original_title",original_title);
-                intent.putExtra("poster",poster);
-                intent.putExtra("overview",overview);
-                intent.putExtra("vote",vote);
-                intent.putExtra("relesing_date",relesing_date);
-                intent.putExtra("Movieid",Movieid);
+                updateUI(MovieDataArray);
+
+                if(isFromFavorite){
+
+
+                    MyParcelable dataToSend = new MyParcelable(original_title,poster,overview,vote,relesing_date,Movieid);
+                    intent.putExtra("myData",dataToSend);
+                    intent.putExtra("isFromFavorite",isFromFavorite);
+
+                }else {
+                    MyParcelable dataToSend = new MyParcelable(original_title,poster,overview,vote,relesing_date,Movieid);
+                    intent.putExtra("myData",dataToSend);
+                    intent.putExtra("isFromFavorite",isFromFavorite);
+
+                }
+
                 startActivity(intent);
             }
         });
 
     }
+
+
+    /********************************************************/
     public static boolean isNetworkStatusAvialable (Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null)
@@ -135,6 +210,18 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    private void updateUI(ArrayList<MovieData> MovieDataArray) {
+
+        adpater = new Adpater(this,MovieDataArray);
+
+        GridView gridView = (GridView)findViewById(R.id.gridview);
+
+        gridView.setAdapter(adpater);
+    }
+
+    /********************************************************/
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -233,12 +320,74 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.Favorite:
 
+                if(gridView.getVisibility() == android.view.View.INVISIBLE){
+
+                    gridView.setVisibility(android.view.View.VISIBLE);
+                    imageView.setVisibility(android.view.View.INVISIBLE);
+
+                }
+
+                if(adpater != null){
+                    MovieDataArray.clear();
+                    adpater.clear();
+                    adpater.notifyDataSetChanged();
+                    Log.e("Favorite","Favorite");
+                }
+
+
                 RefreshMenu.setVisible(false);
                 FavoriteMenu.setVisible(false);
                 PopularMENU.setVisible(true);
                 RatingMENU.setVisible(true);
 
+                String[] project = {
+                        MovieContract.MovieEntry.MOVIE_JSON_ID,
+                        MovieContract.MovieEntry.COLUMN_MOVIE_NAME,
+                        MovieContract.MovieEntry.RATING,
+                        MovieContract.MovieEntry.DATE,
+                        MovieContract.MovieEntry.OVERVIEW,
+                        MovieContract.MovieEntry.POSTERIMAGE
+                };
 
+                Cursor cursor = getContentResolver().query(
+                        MovieContract.MovieEntry.CONTENT_URL,
+                        project,
+                        null,
+                        null,
+                        null
+                );
+
+                try{
+                    int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
+                    int a = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_NAME);
+                    int b = cursor.getColumnIndex(MovieContract.MovieEntry.RATING);
+                    int c = cursor.getColumnIndex(MovieContract.MovieEntry.DATE);
+                    int d = cursor.getColumnIndex(MovieContract.MovieEntry.OVERVIEW);
+                    int e = cursor.getColumnIndex(MovieContract.MovieEntry.POSTERIMAGE);
+
+                    while(cursor.moveToNext()){
+                        String movieid = cursor.getString(aa);
+                        String name = cursor.getString(a);
+                        String rating = cursor.getString(b);
+                        String date = cursor.getString(c);
+                        String overview = cursor.getString(d);
+                        byte[] bytes = cursor.getBlob(e);
+
+                        int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                        int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                        isFromDataBase = true;
+
+                        MovieDataArray.add(new MovieData(name,bytes,rating,overview,date,movieid,randomAndroidColor,isFromDataBase));
+
+                    }
+
+                }finally {
+                    cursor.close();
+                }
+
+                isFromFavorite = true;
+
+                updateUI(MovieDataArray);
 
                 return true;
 
@@ -276,19 +425,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updateUI(ArrayList<MovieData> MovieDataArray) {
 
-        adpater = new Adpater(this,MovieDataArray);
-
-        GridView gridView = (GridView)findViewById(R.id.gridview);
-
-        gridView.setAdapter(adpater);
-    }
+    /******************************************************************************************/
 
     private class MovieAsyncTask extends AsyncTask<URL, Void ,ArrayList<MovieData>>{
 
         @Override
         protected ArrayList<MovieData> doInBackground(URL... params) {
+
+            Log.e("doInBackground","doInBackground");
 
             URL url = null;
 
@@ -299,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            String json = null;
+            json = null;
 
             try {
                 json = httprequest(url);
@@ -354,8 +499,9 @@ public class MainActivity extends AppCompatActivity {
 
                     int[] androidColors = getResources().getIntArray(R.array.androidcolors);
                     int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                    isFromDataBase = false;
 
-                    MovieDataArray.add(new MovieData(Moviename,MoviePoster,MovieRating,MovieOverview,MovieRelesingDate,MovieId,randomAndroidColor));
+                    MovieDataArray.add(new MovieData(Moviename,MoviePoster,MovieRating,MovieOverview,MovieRelesingDate,MovieId,randomAndroidColor,isFromDataBase));
 
                     Log.e("Moviename=",Moviename);
                     Log.e("MoviePoster=",MoviePoster);
@@ -364,6 +510,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("MovieRelesingDate",MovieRelesingDate);
                     Log.e("movieId",String.valueOf(MovieId));
                 }
+
+                isFromFavorite = false;
             }
 
             return MovieDataArray;
@@ -426,4 +574,126 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+
+    /*************************************************************************************************/
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("json",json);
+        outState.putBoolean("boolean",isFromFavorite);
+    }
+
+    private ArrayList<MovieData> getJSONdata(String json) throws JSONException {
+
+        if (TextUtils.isEmpty(json)) {
+            return null;
+        }
+
+        JSONObject FirstOBJ = new JSONObject(json);
+        JSONArray FirstARRAY = FirstOBJ.getJSONArray("results");
+
+        if (FirstARRAY.length() > 0) {
+
+            for (int i = 0; FirstARRAY.length() > i; i++) {
+
+                JSONObject secondOBJ = FirstARRAY.getJSONObject(i);
+
+                String Moviename = secondOBJ.getString("original_title");
+                String MoviePoster = secondOBJ.getString("poster_path");
+                double MovieRating = secondOBJ.getDouble("vote_average");
+                String MovieOverview = secondOBJ.getString("overview");
+                String MovieRelesingDate = secondOBJ.getString("release_date");
+                int MovieId = secondOBJ.getInt("id");
+
+                int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                isFromDataBase = false;
+
+                MovieDataArray.add(new MovieData(Moviename,MoviePoster,MovieRating,MovieOverview,MovieRelesingDate,MovieId,randomAndroidColor,isFromDataBase));
+
+                Log.e("Moviename=",Moviename);
+                Log.e("MoviePoster=",MoviePoster);
+                Log.e("MovieRating=",String.valueOf(MovieRating));
+                Log.e("MovieOverview=",MovieOverview);
+                Log.e("MovieRelesingDate",MovieRelesingDate);
+                Log.e("movieId",String.valueOf(MovieId));
+            }
+
+            isFromFavorite = false;
+        }
+
+        return MovieDataArray;
+    }
+
+    private ArrayList<MovieData> getJSONDATA(){
+
+        if(gridView.getVisibility() == android.view.View.INVISIBLE){
+
+            gridView.setVisibility(android.view.View.VISIBLE);
+            imageView.setVisibility(android.view.View.INVISIBLE);
+
+        }
+
+        if(adpater != null){
+            MovieDataArray.clear();
+            adpater.clear();
+            adpater.notifyDataSetChanged();
+            Log.e("Favorite","Favorite");
+        }
+
+
+        String[] project = {
+                MovieContract.MovieEntry.MOVIE_JSON_ID,
+                MovieContract.MovieEntry.COLUMN_MOVIE_NAME,
+                MovieContract.MovieEntry.RATING,
+                MovieContract.MovieEntry.DATE,
+                MovieContract.MovieEntry.OVERVIEW,
+                MovieContract.MovieEntry.POSTERIMAGE
+        };
+
+        Cursor cursor = getContentResolver().query(
+                MovieContract.MovieEntry.CONTENT_URL,
+                project,
+                null,
+                null,
+                null
+        );
+
+        try{
+            int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
+            int a = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_NAME);
+            int b = cursor.getColumnIndex(MovieContract.MovieEntry.RATING);
+            int c = cursor.getColumnIndex(MovieContract.MovieEntry.DATE);
+            int d = cursor.getColumnIndex(MovieContract.MovieEntry.OVERVIEW);
+            int e = cursor.getColumnIndex(MovieContract.MovieEntry.POSTERIMAGE);
+
+            while(cursor.moveToNext()){
+                String movieid = cursor.getString(aa);
+                String name = cursor.getString(a);
+                String rating = cursor.getString(b);
+                String date = cursor.getString(c);
+                String overview = cursor.getString(d);
+                byte[] bytes = cursor.getBlob(e);
+
+                int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                isFromDataBase = true;
+
+                MovieDataArray.add(new MovieData(name,bytes,rating,overview,date,movieid,randomAndroidColor,isFromDataBase));
+
+            }
+
+        }finally {
+            cursor.close();
+        }
+
+        isFromFavorite = true;
+
+        return MovieDataArray;
+    }
+
+    /**************************************************************************************************/
+
 }

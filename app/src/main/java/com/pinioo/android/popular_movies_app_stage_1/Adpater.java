@@ -1,10 +1,15 @@
 package com.pinioo.android.popular_movies_app_stage_1;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +37,15 @@ public class Adpater extends ArrayAdapter<MovieData>{
 
     private Context context;
     private int ColorID;
+    public boolean isfromdatabse;
+    public byte[] bytes;
+    public Bitmap bitmap;
 
     public Adpater(Context context, ArrayList<MovieData> MovieData) {
         super(context, 0, MovieData);
         this.context = context;
     }
+
 
 
 
@@ -64,17 +73,27 @@ public class Adpater extends ArrayAdapter<MovieData>{
         View TextLinear = gridView.findViewById(R.id.textcontainer);
 
         TextLinear.setBackgroundColor(currentMovieData.getColorID());
+        isfromdatabse = currentMovieData.getisFromDataBase();
 
+        if(isfromdatabse){
+            bytes = currentMovieData.getImageinbyte();
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,100, bytes.length);
 
-
-               Glide.with(context)
+            Glide.with(context)
+                    .load(bytes)
+                    .override(300,300)
+                    .thumbnail(1f)
+                    .crossFade()
+                    .into(imageView);
+        }
+        else {
+            Glide.with(context)
                     .load(IMAGEURLW300 + currentMovieData.getMovieImage())
                     .override(300,300)
                     .thumbnail(1f)
                     .crossFade()
                     .into(imageView);
-
-
+        }
 
         double ratingFloat = currentMovieData.getMovieRating();
         String ratingText = String.valueOf(ratingFloat);
@@ -82,9 +101,7 @@ public class Adpater extends ArrayAdapter<MovieData>{
         textView.setText(currentMovieData.getMovieName());
         ratingview.setText(ratingText);
 
-
         return gridView;
-
 
     }
 }

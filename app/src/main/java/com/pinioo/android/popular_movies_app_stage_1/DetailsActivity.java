@@ -64,17 +64,15 @@ public class DetailsActivity extends AppCompatActivity {
     String ReviewAPI;
     String MovieAPIwebURL2Review = "/reviews?api_key=";
 
-    int MovieId;
-    String MovieIdString;
-
-    private final static String IMAGEURLW500 = "https://image.tmdb.org/t/p/w500";
-
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
     private FloatingActionButton floatingActionButton;
 
-    int Movie_JSON_ID;
+
+    int MovieId;
+    String MovieIdString;
+
     String Original_title;
     String Poster;
     String Overview;
@@ -85,7 +83,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     String jsonReponceString;
 
-    Cursor cursor;
+    boolean isfromfavoritedatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +96,11 @@ public class DetailsActivity extends AppCompatActivity {
 
         floatingActionButton = (FloatingActionButton)findViewById(R.id.FloatingActionButton);
 
-        MovieId = (int)getIntent().getExtras().get("Movieid");
-        Original_title =getIntent().getExtras().getString("original_title");
+        MyParcelable object = (MyParcelable) getIntent().getParcelableExtra("myData");
+
+        isfromfavoritedatabase = (boolean)getIntent().getExtras().get("isFromFavorite");
+
+        MovieId = object.Movieid;
 
         MovieIdString = String.valueOf(MovieId);
         MovieAPI = MovieAPIwebURL+MovieIdString+MovieAPIwebURL2+KEY+MovieAPIwebURL3;
@@ -117,9 +118,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         /*****************************************************************/
 
-
-
-        Movie_JSON_ID = MovieId;
+        floatingbuttongraphics();
 
 
 
@@ -137,7 +136,7 @@ public class DetailsActivity extends AppCompatActivity {
                 review.saveDataReview();
 
                 insertdataintodatabse();
-                getdatafromdatabase();
+//                getdatafromdatabase();
 
             }
 
@@ -145,48 +144,95 @@ public class DetailsActivity extends AppCompatActivity {
 
     }
 
-    private void getdatafromdatabase(){
+    private void floatingbuttongraphics() {
 
-        String[] project = {
-                MovieContract.MovieEntry.MOVIE_JSON_ID,
-                MovieContract.MovieEntry.COLUMN_MOVIE_NAME,
-                MovieContract.MovieEntry.RATING,
-                MovieContract.MovieEntry.DATE,
-                MovieContract.MovieEntry.OVERVIEW,
-                MovieContract.MovieEntry.POSTERIMAGE
-        };
 
-        Cursor cursor = getContentResolver().query(
-                MovieContract.MovieEntry.CONTENT_URL,
-                project,
-                null,
-                null,
-                null
-        );
+        if(isfromfavoritedatabase){
 
-        try{
-            int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
-            int a = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_NAME);
-            int b = cursor.getColumnIndex(MovieContract.MovieEntry.RATING);
-            int c = cursor.getColumnIndex(MovieContract.MovieEntry.DATE);
-            int d = cursor.getColumnIndex(MovieContract.MovieEntry.OVERVIEW);
-            int e = cursor.getColumnIndex(MovieContract.MovieEntry.POSTERIMAGE);
+            floatingActionButton.setImageResource(R.drawable.ic_done_black_24dp);
+            floatingActionButton.setEnabled(false);
 
-            while(cursor.moveToNext()){
-                String movieid = cursor.getString(aa);
-                String name = cursor.getString(a);
-                String rating = cursor.getString(b);
-                String date = cursor.getString(c);
-                String overview = cursor.getString(d);
-                byte[] bytes = cursor.getBlob(e);
+        }
 
-                Toast.makeText(DetailsActivity.this,"retriving data",Toast.LENGTH_LONG).show();
+        else {
+
+            String[] project = { MovieContract.MovieEntry.MOVIE_JSON_ID };
+
+            Cursor cursor = getContentResolver().query(
+                    MovieContract.MovieEntry.CONTENT_URL,
+                    project,
+                    null,
+                    null,
+                    null
+            );
+
+            try{
+                int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
+
+                while(cursor.moveToNext()){
+
+                    int movieid = cursor.getInt(aa);
+
+                    if(movieid == MovieId){
+
+                        floatingActionButton.setImageResource(R.drawable.ic_done_black_24dp);
+                        floatingActionButton.setEnabled(false);
+                        break;
+                    }
+
+
+                }
+
+            }finally {
+                cursor.close();
             }
 
-        }finally {
-            cursor.close();
         }
+
     }
+
+//    private void getdatafromdatabase(){
+//
+//        String[] project = {
+//                MovieContract.MovieEntry.MOVIE_JSON_ID,
+//                MovieContract.MovieEntry.COLUMN_MOVIE_NAME,
+//                MovieContract.MovieEntry.RATING,
+//                MovieContract.MovieEntry.DATE,
+//                MovieContract.MovieEntry.OVERVIEW,
+//                MovieContract.MovieEntry.POSTERIMAGE
+//        };
+//
+//        Cursor cursor = getContentResolver().query(
+//                MovieContract.MovieEntry.CONTENT_URL,
+//                project,
+//                null,
+//                null,
+//                null
+//        );
+//
+//        try{
+//            int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
+//            int a = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_NAME);
+//            int b = cursor.getColumnIndex(MovieContract.MovieEntry.RATING);
+//            int c = cursor.getColumnIndex(MovieContract.MovieEntry.DATE);
+//            int d = cursor.getColumnIndex(MovieContract.MovieEntry.OVERVIEW);
+//            int e = cursor.getColumnIndex(MovieContract.MovieEntry.POSTERIMAGE);
+//
+//            while(cursor.moveToNext()){
+//                String movieid = cursor.getString(aa);
+//                String name = cursor.getString(a);
+//                String rating = cursor.getString(b);
+//                String date = cursor.getString(c);
+//                String overview = cursor.getString(d);
+//                byte[] bytes = cursor.getBlob(e);
+//
+//                Toast.makeText(DetailsActivity.this,"retriving data",Toast.LENGTH_LONG).show();
+//            }
+//
+//        }finally {
+//            cursor.close();
+//        }
+//    }
 
     private void insertdataintodatabse(){
 
@@ -203,7 +249,7 @@ public class DetailsActivity extends AppCompatActivity {
         ImageBitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
         byte[] bArray = bos.toByteArray();
 
-        Log.e("Movie_JSON_ID",Integer.toString(Movie_JSON_ID));
+        Log.e("Movie_JSON_ID",Integer.toString(MovieId));
         Log.e("Original_title",Original_title.trim());
         Log.e("Vote_string",Vote_string);
         Log.e("Relesing_date",Relasing_date);
@@ -214,7 +260,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         ContentValues values = new ContentValues();
 
-        values.put(MovieContract.MovieEntry.MOVIE_JSON_ID,Movie_JSON_ID);
+        values.put(MovieContract.MovieEntry.MOVIE_JSON_ID,MovieId);
         values.put(MovieContract.MovieEntry.COLUMN_MOVIE_NAME,Original_title);
         values.put(MovieContract.MovieEntry.RATING,Vote_string);
         values.put(MovieContract.MovieEntry.DATE,Relasing_date);
@@ -226,6 +272,9 @@ public class DetailsActivity extends AppCompatActivity {
         Uri newUri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URL,values);
 
         Toast.makeText(DetailsActivity.this,"saving Done",Toast.LENGTH_LONG).show();
+
+        floatingActionButton.setImageResource(R.drawable.ic_done_black_24dp);
+        floatingActionButton.setEnabled(false);
     }
 
     private void setupViewPager(ViewPager viewPager) {

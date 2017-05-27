@@ -1,6 +1,7 @@
 package com.pinioo.android.popular_movies_app_stage_1;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -21,8 +22,12 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.pinioo.android.popular_movies_app_stage_1.Database.MovieContract;
+
+import java.io.UnsupportedEncodingException;
 
 import static android.R.attr.bitmap;
+import static android.R.attr.inAnimation;
 import static android.R.attr.resource;
 
 /**
@@ -53,7 +58,9 @@ public class Overview extends Fragment {
 
     static Bitmap bitmap;
 
-
+    String bytesInString;
+    byte[] bytes;
+    boolean isFromfavorite;
 
     public Overview() {
 
@@ -63,13 +70,57 @@ public class Overview extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Original_title = (String) getActivity().getIntent().getExtras().get("original_title");
-        Poster = (String) getActivity().getIntent().getExtras().get("poster");
-        Overview = (String) getActivity().getIntent().getExtras().get("overview");
-        Vote = (double) getActivity().getIntent().getExtras().get("vote");
-        Relesing_date = (String) getActivity().getIntent().getExtras().get("relesing_date");
-        MovieId = (int)getActivity().getIntent().getExtras().get("Movieid");
+//        Original_title = (String) getActivity().getIntent().getExtras().get("original_title");
+//        Poster = (String) getActivity().getIntent().getExtras().get("poster");
+//        Overview = (String) getActivity().getIntent().getExtras().get("overview");
+//        Vote = (double) getActivity().getIntent().getExtras().get("vote");
+//        Relesing_date = (String) getActivity().getIntent().getExtras().get("relesing_date");
+//        MovieId = (int)getActivity().getIntent().getExtras().get("Movieid");
+//
+//        bytes = (byte[]) getActivity().getIntent().getExtras().get("bytes");
 
+        MyParcelable object = (MyParcelable) getActivity().getIntent().getParcelableExtra("myData");
+
+        Original_title = object.original_title;
+        Poster = object.poster;
+        Overview = object.overview;
+        Vote = object.vote;
+        Relesing_date = object.relesing_date;
+        MovieId = object.Movieid;
+
+        isFromfavorite = (boolean)getActivity().getIntent().getExtras().get("isFromFavorite");
+
+        if(isFromfavorite){
+
+            String[] project = {
+                    MovieContract.MovieEntry.MOVIE_JSON_ID,
+                    MovieContract.MovieEntry.POSTERIMAGE,
+            };
+
+            Cursor cursor = getActivity().getContentResolver().query(
+                    MovieContract.MovieEntry.CONTENT_URL,
+                    project,
+                    null,
+                    null,
+                    null
+            );
+
+            try{
+                int aa = cursor.getColumnIndex(MovieContract.MovieEntry.MOVIE_JSON_ID);
+                int e = cursor.getColumnIndex(MovieContract.MovieEntry.POSTERIMAGE);
+
+                while(cursor.moveToNext()){
+                    int movieid = cursor.getInt(aa);
+                        if(movieid == MovieId){
+                            bytes = cursor.getBlob(e);
+                            break;
+                        }
+                }
+
+            }finally {
+                cursor.close();
+            }
+        }
     }
 
     @Override
@@ -83,69 +134,42 @@ public class Overview extends Fragment {
         ratingView = (TextView)view.findViewById(R.id.MovieAVGRATING);
         OveriewView = (TextView)view.findViewById(R.id.OverviewText);
 
+        if(isFromfavorite){
 
-//        Glide.with(Overview.this)
-//                .load(IMAGEURLW500 +Poster)
-//                .override(700,700)
-//                .thumbnail(1f)
-//                .crossFade()
-//                .into(imageView);
-
-
-        Glide.with(this)
-                .load(IMAGEURLW500 +Poster)
-                .asBitmap()
-                .override(700,700)
-                .thumbnail(1f)
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        imageView.setImageBitmap(resource);
-                        bitmap = resource;
-                    }
-                });
+            Glide.with(this)
+                    .load(bytes)
+                    .override(700,700)
+                    .thumbnail(1f)
+                    .crossFade()
+                    .into(imageView);
 
 
-//        Glide.with(Overview.this)
-//                .load(IMAGEURLW500 +Poster)
-//                .override(700,700)
-//                .thumbnail(1f)
-//                .crossFade()
-//                .listener(new RequestListener<String, GlideDrawable>() {
-//                    @Override
-//                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-//
-//
-//                        BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-//                        bitmap = drawable.getBitmap();
-//
-//                        if(bitmap == null){
-//                            Toast.makeText(getContext(),"fail",Toast.LENGTH_LONG).show();
-//                        }
-//                        else {
-//                            Toast.makeText(getContext(),"done",Toast.LENGTH_LONG).show();
-//                        }
-//
-//                        return false;
-//                    }
-//                })
-//                .into(imageView);
+        }else {
+
+            Glide.with(this)
+                    .load(IMAGEURLW500 +Poster)
+                    .asBitmap()
+                    .override(700,700)
+                    .thumbnail(1f)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                            imageView.setImageBitmap(resource);
+                            bitmap = resource;
+                        }
+                    });
+
+        }
+
+
 
         Vote_string = Double.toString(Vote);
 
-//        Reverse_Relesing_date = new StringBuilder(Relesing_date).reverse().toString();
 
         nameView.setText(Original_title);
         dateView.setText(Relesing_date);
         ratingView.setText(getResources().getText(R.string.Average_rating) +": "+Vote_string);
         OveriewView.setText(Overview);
-
-        Log.e("saveData",Original_title);
 
         return view;
     }

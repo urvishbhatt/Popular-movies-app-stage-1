@@ -19,9 +19,11 @@ public class MovieData {
     public String relesing_date;
     public int id;
     public int colorID;
+    public Boolean isFromDataBase;
 
+    public byte[] bytes;
 
-    public MovieData(String name, String image, double rating,String overview,String relesing_date,int id,int colorID) {
+    public MovieData(String name, String image, double rating, String overview, String relesing_date, int id, int colorID, Boolean isFromDataBase) {
 
         this.name = name;
         this.image = image;
@@ -30,6 +32,21 @@ public class MovieData {
         this.relesing_date = relesing_date;
         this.id = id;
         this.colorID = colorID;
+        this.isFromDataBase = isFromDataBase;
+    }
+
+    public MovieData(String name, byte[] bytes, String rating, String overview, String relesing_date, String movieid, int colorID, Boolean isFromDataBase) {
+
+        this.name = name;
+        this.bytes = bytes;
+        this.rating = Double.parseDouble(rating);
+        this.overview = overview;
+        this.relesing_date = relesing_date;
+        this.id = Integer.parseInt(movieid);
+        this.colorID = colorID;
+        this.isFromDataBase = isFromDataBase;
+
+
     }
 
     public String getMovieName(){
@@ -41,5 +58,7 @@ public class MovieData {
     public String getMovieRelesing_Date() { return relesing_date; }
     public int getMovieId() { return id; }
     public int getColorID(){ return colorID; }
+    public boolean getisFromDataBase() { return isFromDataBase; }
+    public byte[] getImageinbyte() { return bytes; }
 
 }
