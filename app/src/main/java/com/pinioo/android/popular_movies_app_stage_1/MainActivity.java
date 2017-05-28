@@ -143,25 +143,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-
-//            if(isNetworkStatusAvialable (getApplicationContext())) {
-//
-//                Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_LONG).show();
-//                gridView.setVisibility(android.view.View.VISIBLE);
-//                MovieAsyncTask task = new MovieAsyncTask();
-//                task.execute();
-//
-//            } else {
-//
-//                gridView.setVisibility(android.view.View.INVISIBLE);
-//                Toast.makeText(MainActivity.this,getResources().getText(R.string.NO_Internet),Toast.LENGTH_LONG).show();
-//                imageView.setImageDrawable(drawable);
-//
-//            }
-
-
-
-
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, android.view.View view, int position, long id) {
@@ -313,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Toast.makeText(MainActivity.this,getResources().getText(R.string.Most_popular_movies),Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this,"No internet connection",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,getResources().getText(R.string.No_internet_connection),Toast.LENGTH_LONG).show();
                 }
 
                 return true;

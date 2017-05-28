@@ -38,7 +38,7 @@ public class Review extends Fragment {
 
 
     String MovieAPIwebURL = "https://api.themoviedb.org/3/movie/";
-    String KEY = "382a81cb81a8ab80eb5f89325e2095d3";
+    String KEY = "";
     String MovieAPIwebURL3 = "&language=en-US";
     String MovieAPIwebURL2Review = "/reviews?api_key=";
     int MovieId;

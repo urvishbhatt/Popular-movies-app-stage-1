@@ -2,10 +2,14 @@ package com.pinioo.android.popular_movies_app_stage_1;
 
 import android.app.ActionBar;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +19,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.os.Bundle;
@@ -23,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 
 import com.bumptech.glide.Glide;
@@ -45,16 +51,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements DialogInterface.OnClickListener {
 
 
     String MovieAPI;
 
     String MovieAPIwebURL = "https://api.themoviedb.org/3/movie/";
     String MovieAPIwebURL2 = "/videos?api_key=";
-    String KEY = "";
+    String KEY = "382a81cb81a8ab80eb5f89325e2095d3";
     String MovieAPIwebURL3 = "&language=en-US";
-
 
     String VideoLinkKey;
 
@@ -64,11 +69,10 @@ public class DetailsActivity extends AppCompatActivity {
     String ReviewAPI;
     String MovieAPIwebURL2Review = "/reviews?api_key=";
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+    TabLayout tabLayout;
+    ViewPager viewPager;
 
     private FloatingActionButton floatingActionButton;
-
 
     int MovieId;
     String MovieIdString;
@@ -84,6 +88,14 @@ public class DetailsActivity extends AppCompatActivity {
     String jsonReponceString;
 
     boolean isfromfavoritedatabase;
+
+    ArrayList<String> YOUTUBELINKNAME = new ArrayList<>();
+    ArrayList<String> YOUTUBELINKEY = new ArrayList<>();
+
+    String YOUTUBELINKNAMElist[];
+    String YOUTUBELINKEYlist[];
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,8 +132,6 @@ public class DetailsActivity extends AppCompatActivity {
 
         floatingbuttongraphics();
 
-
-
         /***************************************************************************************************/
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -141,6 +151,8 @@ public class DetailsActivity extends AppCompatActivity {
             }
 
         });
+
+        /********************************************************************************************************/
 
     }
 
@@ -275,7 +287,10 @@ public class DetailsActivity extends AppCompatActivity {
 
         floatingActionButton.setImageResource(R.drawable.ic_done_black_24dp);
         floatingActionButton.setEnabled(false);
+
     }
+
+    /**************************************************************************************/
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -312,6 +327,8 @@ public class DetailsActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
     }
+
+    /**************************************************************************************/
 
     private class MovieInfo extends AsyncTask<URL, Void, String>{
 
@@ -355,10 +372,17 @@ public class DetailsActivity extends AppCompatActivity {
 
                             if(VideoLinktype.equals("Trailer")){
 
-                                VideoLinkKey = NumberOfObject.getString("key");
-                                Log.e("VideoLinkKey",VideoLinkKey);
+//                                VideoLinkKey = NumberOfObject.getString("key");
+//                                Log.e("VideoLinkKey",VideoLinkKey);
 
-                                break;
+                                String key = NumberOfObject.getString("key");
+                                String name = NumberOfObject.getString("name");
+
+                                Log.e("aa",key);
+                                Log.e("aa",name);
+
+                                YOUTUBELINKEY.add(key);
+                                YOUTUBELINKNAME.add(name);
 
 
                             }
@@ -368,10 +392,6 @@ public class DetailsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-
-
-
             return null;
         }
 
@@ -449,6 +469,8 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    /**************************************************************************************/
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -461,10 +483,39 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
 
-            case R.id.playtraile:
+        if(isNetworkStatusAvialable (getApplicationContext())) {
 
+            switch (item.getItemId()){
+
+                case R.id.playtraile:
+
+
+                    YOUTUBELINKNAMElist = YOUTUBELINKNAME.toArray(new String[YOUTUBELINKNAME.size()]);
+                    YOUTUBELINKEYlist = YOUTUBELINKEY.toArray(new String[YOUTUBELINKEY.size()]);
+
+                    AlertDialog dia;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setItems(YOUTUBELINKNAMElist,this);
+
+                    dia = builder.create();
+                    dia.show();
+
+            }
+        }else {
+            Toast.makeText(DetailsActivity.this,getResources().getText(R.string.No_internet_connection),Toast.LENGTH_LONG).show();
+        }
+
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int pos) {
+
+
+                VideoLinkKey = YOUTUBELINKEYlist[pos];
 
                 YOUTUBE_TrailerLink = YOUTUBE+VideoLinkKey;
 
@@ -477,11 +528,20 @@ public class DetailsActivity extends AppCompatActivity {
                 startActivity(intent);
 
 
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
+    public static boolean isNetworkStatusAvialable (Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null)
+        {
+            NetworkInfo netInfos = connectivityManager.getActiveNetworkInfo();
+            if(netInfos != null)
+                if(netInfos.isConnected())
+                    return true;
+        }
+        return false;
+    }
 
+    /******************************************************************************************/
 
 }

@@ -1,13 +1,13 @@
 <resources>
-    <string name="app_name">Popular movies</string>
+    <string name="app_name" translatable="true">Popular movies</string>
     
-    <string name="Overview">Overview</string>
-    <string name="Average_rating">Average rating</string>
+    <string name="Overview" translatable="true">Overview</string>
+    <string name="Average_rating" translatable="true">Average rating</string>
 
-    <string name="Highest_rated_movies">Highest rated movies</string>
-    <string name="Most_popular_movies">Most popular movies</string>
+    <string name="Highest_rated_movies" translatable="true">Highest rated movies</string>
+    <string name="Most_popular_movies" translatable="true">Most popular movies</string>
 
-    <string name="NO_Internet">NO_Internet</string>
-    <string name="No_internet_connection">No internet connection</string>
+    <string name="NO_Internet" translatable="true">NO_Internet</string>
+    <string name="No_internet_connection" translatable="true">No internet connection</string>
 
 </resources>
